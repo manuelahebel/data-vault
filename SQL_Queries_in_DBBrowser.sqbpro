@@ -1,0 +1,1587 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/Alfa/Desktop/Projekt_DataVault_GruppeB.db" readonly="0" foreign_keys="0" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="0" synchronous="1"/><attached><db schema="Source" path="D:\OneDrive\Alfa-Training\Data Engineering\Projekt\Database\database.sqlite"/></attached><window><main_tabs open="browser pragmas query structure" current="2"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="150"/><column_width id="3" width="6507"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/><expanded_item id="4" parent="1"/></tab_structure><tab_browse><current_table name="4,10:mainHub_League"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="Hub_League" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths/><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="Creates.sql">--Droptabelle--
+DROP TABLE IF EXISTS Sat_League;
+DROP TABLE IF EXISTS Sat_Team;
+DROP TABLE IF EXISTS Sat_Team_Soccer;
+DROP TABLE IF EXISTS Sat_Link_Match;
+DROP TABLE IF EXISTS Sat_Link_Match_Soccer;
+DROP TABLE IF EXISTS Sat_Link_Match_Player_Soccer_BV;
+DROP TABLE IF EXISTS Sat_Link_Match_Player_Soccer;
+DROP TABLE IF EXISTS Sat_Player;
+DROP TABLE IF EXISTS Sat_Player_Soccer;
+DROP TABLE IF EXISTS Sat_Player_Soccer_BV;
+DROP TABLE IF EXISTS Link_Match;
+DROP TABLE IF EXISTS Link_Match_Player;
+DROP TABLE IF EXISTS Hub_Team;
+DROP TABLE IF EXISTS Hub_Player;
+DROP TABLE IF EXISTS Hub_League;
+DROP TABLE IF EXISTS Record_Source;
+
+
+--Create_Source--
+CREATE TABLE Record_Source(
+source_id INTEGER PRIMARY KEY AUTOINCREMENT ,  
+source_name varchar(30),
+comment varchar(100) DEFAULT NULL
+);
+
+--Create_Hubs--
+CREATE TABLE Hub_Team(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+bk VARCHAR(30),
+ldts DateTime DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Hub_League(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+bk INTEGER,
+ldts DateTime DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Hub_Player(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,   
+bk VARCHAR(30),
+ldts DateTime DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+--Create_Links--
+
+CREATE TABLE Link_Match (
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+home_team_id VARCHAR(32),
+away_team_id VARCHAR(32),
+league_id VARCHAR(32),
+date_of_match DATE,
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(home_team_id) references Hub_Team(hk),
+Foreign Key(away_team_id) references Hub_Team(hk),
+Foreign Key(league_id) references Hub_League(hk)
+);
+
+CREATE TABLE Link_Match_Player (
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+match_id VARCHAR(32),
+player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(match_id) references Link_Match(hk),
+Foreign Key(player_id) references Hub_Player(hk)
+);
+--Create_Sats--
+CREATE TABLE Sat_League(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+league_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+league_name VARCHAR(40),
+country_name VARCHAR(60),
+Foreign Key(league_id) references Hub_League(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Team(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+team_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+long_name VARCHAR(35),
+short_name VARCHAR(5),
+sport_type VARCHAR(35) DEFAULT &quot;soccer&quot;,
+gender VARCHAR(1) DEFAULT &quot;m&quot;,
+club_team INTEGER DEFAULT 1,
+Foreign Key(team_id) references Hub_Team(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Team_Soccer(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+team_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+team_fifa_api_id INTEGER,
+team_api_id INTEGER,
+date_of_record DATE,
+buildUpPlaySpeed INTEGER,
+buildUpPlaySpeedClass VARCHAR(25),
+buildUpPlayDribbling REAL,
+buildUpPlayDribblingClass VARCHAR(25),
+buildUpPlayPassing INTEGER,
+buildUpPlayPassingClass VARCHAR(25),
+buildUpPlayPositioningClass VARCHAR(25),
+chanceCreationPassing INTEGER,
+chanceCreationPassingClass VARCHAR(25),
+chanceCreationCrossing INTEGER,
+chanceCreationCrossingClass VARCHAR(25),
+chanceCreationShooting INTEGER,
+chanceCreationShootingClass INTEGER,
+chanceCreationPositioningClass INTEGER,
+defencePressure INTEGER,
+defencePressureClass VARCHAR(25),
+defenceAggression INTEGER,
+defenceAggressionClass VARCHAR(25),
+defenceTeamWidth INTEGER,
+defenceTeamWidthClass VARCHAR(25),
+defenceDefenderLineClass VARCHAR(25),
+Foreign Key(team_id) references Hub_Team(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Link_Match_Soccer(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,   
+match_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+bk_match_id INTEGER,
+match_api_id INTEGER,
+goal VARCHAR(2000),
+shot_on VARCHAR(2000),
+shot_off VARCHAR(2000),
+foul_committed VARCHAR(2000),
+card VARCHAR(2000),
+cross_pass VARCHAR(2000),
+corner VARCHAR(2000),
+possession VARCHAR(2000),
+Foreign Key(match_id) references Link_Match(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+
+CREATE TABLE Sat_Link_Match(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,   
+match_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+bk_match_id INTEGER,
+country_name VARCHAR(60),
+season VARCHAR(9),
+stage INTEGER,
+home_team_points INTEGER,
+away_team_points INTEGER,
+B365H REAL,
+B365D REAL,
+B365A REAL,
+BWH REAL,
+BWD REAL,
+BWA REAL,
+IWH REAL,
+IWD REAL,
+IWA REAL,
+LBH REAL,
+LBD REAL,
+LBA REAL,
+PSH REAL,
+PSD REAL,
+PSA REAL,
+WHH REAL,
+WHD REAL,
+WHA REAL,
+SJH REAL,
+SJD REAL,
+SJA REAL,
+VCH REAL,
+VCD REAL,
+VCA REAL,
+GBH REAL,
+GBD REAL,
+GBA REAL,
+BSH REAL,
+BSD REAL,
+BSA REAL,
+Foreign Key(match_id) references Link_Match(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+
+CREATE TABLE Sat_Link_Match_Player_Soccer_BV(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,   
+match_player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+goals INTEGER,
+yellow_cards INTEGER, 
+red_cards INTEGER ,
+shots_on INTEGER,
+shots_off INTEGER,
+cross_passes INTEGER,
+corners INTEGER,
+Foreign Key(match_player_id) references Link_Match_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Link_Match_Player_Soccer (
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,   
+match_player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+home_away VARCHAR(1),
+position_x REAL,
+position_y REAL,
+Foreign Key(match_player_id) references Link_Match_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+
+CREATE TABLE Sat_Player(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+name VARCHAR(70),
+birthday DATE,
+height INTEGER,
+weight INTEGER,
+Foreign Key(player_id) references Hub_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Player_Soccer(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+player_api_id INTEGER,
+player_fifa_api_id INTEGER,
+date_of_record DATE,
+overall_rating INTEGER,
+potential INTEGER,
+preferred_foot VARCHAR(5),
+attacking_work_rate VARCHAR(6),
+defensive_work_rate VARCHAR(6),
+crossing INTEGER,
+finishing INTEGER,
+heading_accuracy INTEGER,
+short_passing INTEGER,
+volleys INTEGER,
+dribbling INTEGER,
+curve INTEGER,
+free_kick_accuracy INTEGER,
+long_passing INTEGER,
+ball_control INTEGER,
+acceleration INTEGER,
+sprint_speed INTEGER,
+agility INTEGER,
+reactions INTEGER,
+balance INTEGER,
+shot_power INTEGER,
+stamina INTEGER,
+strength INTEGER,
+long_shots INTEGER,
+aggression INTEGER,
+interceptions INTEGER,
+vision INTEGER,
+penalties INTEGER,
+marking INTEGER,
+standing_tackle INTEGER, 
+sliding_tackle INTEGER,
+gk_diving INTEGER,
+gk_handling INTEGER,
+gk_kicking INTEGER,
+gk_positioning INTEGER,
+gk_reflexes INTEGER,
+Foreign Key(player_id) references Hub_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Player_Soccer_BV(
+--hk VARCHAR(32) PRIMARY KEY,  
+hk INTEGER PRIMARY KEY AUTOINCREMENT,  
+player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+season VARCHAR(9),
+goals_season INTEGER,
+yellow_cards_season INTEGER, 
+red_cards_season INTEGER ,
+shots_on_season INTEGER,
+shots_off_season INTEGER,
+cross_passes_season INTEGER,
+corners_season INTEGER,
+Foreign Key(player_id) references Hub_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);</sql><sql name="Creates_Python.sql">DROP TABLE IF EXISTS Sat_League;
+DROP TABLE IF EXISTS Sat_Team;
+DROP TABLE IF EXISTS Sat_Team_Soccer;
+DROP TABLE IF EXISTS Sat_Link_Match;
+DROP TABLE IF EXISTS Sat_Link_Match_Soccer;
+DROP TABLE IF EXISTS Sat_Link_Match_Player_Soccer_BV;
+DROP TABLE IF EXISTS Sat_Link_Match_Player_Soccer;
+DROP TABLE IF EXISTS Sat_Player;
+DROP TABLE IF EXISTS Sat_Player_Soccer;
+DROP TABLE IF EXISTS Sat_Player_Soccer_BV;
+DROP TABLE IF EXISTS Link_Match;
+DROP TABLE IF EXISTS Link_Match_Player;
+DROP TABLE IF EXISTS Hub_Team;
+DROP TABLE IF EXISTS Hub_Player;
+DROP TABLE IF EXISTS Hub_League;
+DROP TABLE IF EXISTS Record_Source;
+
+CREATE TABLE Record_Source(
+source_id INTEGER PRIMARY KEY AUTOINCREMENT ,  
+source_name varchar(30),
+comment varchar(100) DEFAULT NULL
+);
+
+CREATE TABLE Hub_Team(
+hk VARCHAR(32) PRIMARY KEY,
+bk VARCHAR(30),
+ldts DateTime DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Hub_League(
+hk VARCHAR(32) PRIMARY KEY,
+bk INTEGER,
+ldts DateTime DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Hub_Player(
+hk VARCHAR(32) PRIMARY KEY,
+bk VARCHAR(30),
+ldts DateTime DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Link_Match (
+hk VARCHAR(32) PRIMARY KEY, 
+home_team_id VARCHAR(32),
+away_team_id VARCHAR(32),
+league_id VARCHAR(32),
+date_of_match DATE,
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(home_team_id) references Hub_Team(hk),
+Foreign Key(away_team_id) references Hub_Team(hk),
+Foreign Key(league_id) references Hub_League(hk)
+);
+
+CREATE TABLE Link_Match_Player (
+hk VARCHAR(32) PRIMARY KEY,
+match_id VARCHAR(32),
+player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+rs INTEGER DEFAULT 1,
+Foreign Key(match_id) references Link_Match(hk),
+Foreign Key(player_id) references Hub_Player(hk)
+);
+
+CREATE TABLE Sat_League(
+hk VARCHAR(32) PRIMARY KEY,
+league_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+league_name VARCHAR(40),
+country_name VARCHAR(60),
+Foreign Key(league_id) references Hub_League(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Team(
+hk VARCHAR(32) PRIMARY KEY,
+team_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+long_name VARCHAR(35),
+short_name VARCHAR(5),
+sport_type VARCHAR(35) DEFAULT &quot;soccer&quot;,
+gender VARCHAR(1) DEFAULT &quot;m&quot;,
+club_team INTEGER DEFAULT 1,
+Foreign Key(team_id) references Hub_Team(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Team_Soccer(
+hk VARCHAR(32) PRIMARY KEY,
+team_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+team_fifa_api_id INTEGER,
+team_api_id INTEGER,
+date_of_record DATE,
+buildUpPlaySpeed INTEGER,
+buildUpPlaySpeedClass VARCHAR(25),
+buildUpPlayDribbling REAL,
+buildUpPlayDribblingClass VARCHAR(25),
+buildUpPlayPassing INTEGER,
+buildUpPlayPassingClass VARCHAR(25),
+buildUpPlayPositioningClass VARCHAR(25),
+chanceCreationPassing INTEGER,
+chanceCreationPassingClass VARCHAR(25),
+chanceCreationCrossing INTEGER,
+chanceCreationCrossingClass VARCHAR(25),
+chanceCreationShooting INTEGER,
+chanceCreationShootingClass INTEGER,
+chanceCreationPositioningClass INTEGER,
+defencePressure INTEGER,
+defencePressureClass VARCHAR(25),
+defenceAggression INTEGER,
+defenceAggressionClass VARCHAR(25),
+defenceTeamWidth INTEGER,
+defenceTeamWidthClass VARCHAR(25),
+defenceDefenderLineClass VARCHAR(25),
+Foreign Key(team_id) references Hub_Team(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Link_Match_Soccer(
+hk VARCHAR(32) PRIMARY KEY,
+match_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+bk_match_id INTEGER,
+match_api_id INTEGER,
+goal VARCHAR(2000),
+shot_on VARCHAR(2000),
+shot_off VARCHAR(2000),
+foul_committed VARCHAR(2000),
+card VARCHAR(2000),
+cross_pass VARCHAR(2000),
+corner VARCHAR(2000),
+possession VARCHAR(2000),
+Foreign Key(match_id) references Link_Match(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Link_Match(
+hk VARCHAR(32) PRIMARY KEY, 
+match_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+bk_match_id INTEGER,
+country_name VARCHAR(60),
+season VARCHAR(9),
+stage INTEGER,
+home_team_points INTEGER,
+away_team_points INTEGER,
+B365H REAL,
+B365D REAL,
+B365A REAL,
+BWH REAL,
+BWD REAL,
+BWA REAL,
+IWH REAL,
+IWD REAL,
+IWA REAL,
+LBH REAL,
+LBD REAL,
+LBA REAL,
+PSH REAL,
+PSD REAL,
+PSA REAL,
+WHH REAL,
+WHD REAL,
+WHA REAL,
+SJH REAL,
+SJD REAL,
+SJA REAL,
+VCH REAL,
+VCD REAL,
+VCA REAL,
+GBH REAL,
+GBD REAL,
+GBA REAL,
+BSH REAL,
+BSD REAL,
+BSA REAL,
+Foreign Key(match_id) references Link_Match(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+
+CREATE TABLE Sat_Link_Match_Player_Soccer_BV(
+hk VARCHAR(32) PRIMARY KEY,  
+match_player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+goals INTEGER,
+yellow_cards INTEGER, 
+red_cards INTEGER ,
+shots_on INTEGER,
+shots_off INTEGER,
+cross_passes INTEGER,
+corners INTEGER,
+Foreign Key(match_player_id) references Link_Match_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Link_Match_Player_Soccer (
+hk VARCHAR(32) PRIMARY KEY, 
+match_player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+home_away VARCHAR(1),
+position_x REAL,
+position_y REAL,
+Foreign Key(match_player_id) references Link_Match_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Player(
+hk VARCHAR(32) PRIMARY KEY,
+player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+name VARCHAR(70),
+birthday DATE,
+height INTEGER,
+weight INTEGER,
+Foreign Key(player_id) references Hub_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Player_Soccer(
+hk VARCHAR(32) PRIMARY KEY,
+player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+player_api_id INTEGER,
+player_fifa_api_id INTEGER,
+date_of_record DATE,
+overall_rating INTEGER,
+potential INTEGER,
+preferred_foot VARCHAR(5),
+attacking_work_rate VARCHAR(6),
+defensive_work_rate VARCHAR(6),
+crossing INTEGER,
+finishing INTEGER,
+heading_accuracy INTEGER,
+short_passing INTEGER,
+volleys INTEGER,
+dribbling INTEGER,
+curve INTEGER,
+free_kick_accuracy INTEGER,
+long_passing INTEGER,
+ball_control INTEGER,
+acceleration INTEGER,
+sprint_speed INTEGER,
+agility INTEGER,
+reactions INTEGER,
+balance INTEGER,
+shot_power INTEGER,
+stamina INTEGER,
+strength INTEGER,
+long_shots INTEGER,
+aggression INTEGER,
+interceptions INTEGER,
+vision INTEGER,
+penalties INTEGER,
+marking INTEGER,
+standing_tackle INTEGER, 
+sliding_tackle INTEGER,
+gk_diving INTEGER,
+gk_handling INTEGER,
+gk_kicking INTEGER,
+gk_positioning INTEGER,
+gk_reflexes INTEGER,
+Foreign Key(player_id) references Hub_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);
+
+CREATE TABLE Sat_Player_Soccer_BV(
+hk VARCHAR(32) PRIMARY KEY,
+player_id VARCHAR(32),
+ldts DATETIME DEFAULT CURRENT_TIMESTAMP,
+edts DATETIME DEFAULT '9999-12-31',
+rs INTEGER DEFAULT 1,
+hd VARCHAR(32),
+season VARCHAR(9),
+goals_season INTEGER,
+yellow_cards_season INTEGER, 
+red_cards_season INTEGER ,
+shots_on_season INTEGER,
+shots_off_season INTEGER,
+cross_passes_season INTEGER,
+corners_season INTEGER,
+Foreign Key(player_id) references Hub_Player(hk),
+Foreign Key(rs) references Record_Source(source_id)
+);</sql><sql name="Inserts">--- Hubs
+INSERT INTO Record_Source (source_name, comment) VALUES ('database.db', 'diese Datenbank umfasst Daten aus anderen Quellsystemen, über deren Quelldaten wir nicht verfügen');
+
+INSERT INTO Hub_League (bk)
+	SELECT id FROM Source.League;
+	
+INSERT INTO Hub_Team(bk)
+	SELECT id FROM Source.Team;
+
+INSERT INTO Hub_Player(bk)
+	SELECT id FROM Source.Player;
+	
+--- Satelliten zu Hubs
+
+INSERT INTO Sat_League (league_id, league_name, country_name)
+	SELECT Hub_League.hk, Source.League.name, Source.Country.name FROM Hub_League
+		LEFT JOIN Source.League ON Source.League.id = Hub_League.bk
+			LEFT JOIN Source.Country ON Source.Country.id = Source.League.country_id;
+
+INSERT INTO Sat_Team (team_id, long_name, short_name, sport_type, gender, club_team)
+	SELECT Hub_Team.hk, Source.Team.team_long_name, Source.Team.team_short_name, 'soccer', 'm', 1 FROM Hub_Team
+		LEFT JOIN Source.Team ON Hub_Team.bk = Source.Team.id;
+
+--- NOCH EINEN Satelliten Sat_Team_BV machen und Attribute sport_type, gender und club_team da mit rein nehmen (da neue Attribute?!)
+		
+INSERT INTO Sat_Team_Soccer (team_id,
+							team_fifa_api_id, 
+							team_api_id, 
+							date_of_record, 
+							buildUpPlaySpeed,
+							buildUpPlaySpeedClass,
+							buildUpPlayDribbling,
+							buildUpPlayDribblingClass,
+							buildUpPlayPassing,
+							buildUpPlayPassingClass,
+							buildUpPlayPositioningClass,
+							chanceCreationPassing,
+							chanceCreationPassingClass,
+							chanceCreationCrossing,
+							chanceCreationCrossingClass,
+							chanceCreationShooting,
+							chanceCreationShootingClass,
+							chanceCreationPositioningClass,
+							defencePressure,
+							defencePressureClass,
+							defenceAggression,
+							defenceAggressionClass,
+							defenceTeamWidth,
+							defenceTeamWidthClass,
+							defenceDefenderLineClass)
+		SELECT Hub_Team.hk, 
+				Source.Team_Attributes.team_fifa_api_id,
+				Source.Team_Attributes.team_api_id,
+				Source.Team_Attributes.date,
+				Source.Team_Attributes.buildUpPlaySpeed,
+				Source.Team_Attributes.buildUpPlaySpeedClass,
+				Source.Team_Attributes.buildUpPlayDribbling,
+				Source.Team_Attributes.buildUpPlayDribblingClass,
+				Source.Team_Attributes.buildUpPlayPassing,
+				Source.Team_Attributes.buildUpPlayPassingClass,
+				Source.Team_Attributes.buildUpPlayPositioningClass,
+				Source.Team_Attributes.chanceCreationPassing,
+				Source.Team_Attributes.chanceCreationPassingClass,
+				Source.Team_Attributes.chanceCreationCrossing,
+				Source.Team_Attributes.chanceCreationCrossingClass,
+				Source.Team_Attributes.chanceCreationShooting,
+				Source.Team_Attributes.chanceCreationShootingClass,
+				Source.Team_Attributes.chanceCreationPositioningClass,
+				Source.Team_Attributes.defencePressure,
+				Source.Team_Attributes.defencePressureClass,
+				Source.Team_Attributes.defenceAggression,
+				Source.Team_Attributes.defenceAggressionClass,
+				Source.Team_Attributes.defenceTeamWidth,
+				Source.Team_Attributes.defenceTeamWidthClass,
+				Source.Team_Attributes.defenceDefenderLineClass
+			FROM Hub_Team
+				LEFT JOIN Source.Team ON Hub_Team.bk = Source.Team.id
+					LEFT JOIN Source.Team_Attributes 
+						ON Source.Team.team_api_id = Source.Team_Attributes.team_api_id 
+						AND Source.Team.team_fifa_api_id = Source.Team_Attributes.team_fifa_api_id;
+
+
+INSERT INTO Sat_Player (player_id, name, birthday, height, weight)
+	SELECT Hub_Player.hk, Source.Player.player_name, Source.Player.birthday, Source.Player.height,Source.Player.weight
+		FROM Hub_Player
+			LEFT JOIN Source.Player ON Hub_Player.bk = Source.Player.id;
+			
+INSERT INTO Sat_Player_Soccer (player_id, 
+								player_api_id,
+								player_fifa_api_id,
+								date_of_record,
+								overall_rating,
+								potential,
+								preferred_foot,
+								attacking_work_rate,
+								defensive_work_rate,
+								crossing,
+								finishing,
+								heading_accuracy,
+								short_passing,
+								volleys,
+								dribbling,
+								curve,
+								free_kick_accuracy,
+								long_passing,
+								ball_control,
+								acceleration,
+								sprint_speed,
+								agility,
+								reactions,
+								balance,
+								shot_power,
+								stamina,
+								strength,
+								long_shots,
+								aggression,
+								interceptions,
+								vision,
+								penalties,
+								marking,
+								standing_tackle,
+								sliding_tackle,
+								gk_diving,
+								gk_handling,
+								gk_kicking,
+								gk_positioning,
+								gk_reflexes)
+		SELECT Hub_Player.hk, 
+				Source.Player_Attributes.player_api_id,
+				Source.Player_Attributes.player_fifa_api_id,
+				Source.Player_Attributes.date,
+				Source.Player_Attributes.overall_rating,
+				Source.Player_Attributes.potential,
+				Source.Player_Attributes.preferred_foot,
+				Source.Player_Attributes.attacking_work_rate,
+				Source.Player_Attributes.defensive_work_rate,
+				Source.Player_Attributes.crossing,
+				Source.Player_Attributes.finishing,
+				Source.Player_Attributes.heading_accuracy,
+				Source.Player_Attributes.short_passing,
+				Source.Player_Attributes.volleys,
+				Source.Player_Attributes.dribbling,
+				Source.Player_Attributes.curve,
+				Source.Player_Attributes.free_kick_accuracy,
+				Source.Player_Attributes.long_passing,
+				Source.Player_Attributes.ball_control,
+				Source.Player_Attributes.acceleration,
+				Source.Player_Attributes.sprint_speed,
+				Source.Player_Attributes.agility,
+				Source.Player_Attributes.reactions,
+				Source.Player_Attributes.balance,
+				Source.Player_Attributes.shot_power,
+				Source.Player_Attributes.stamina,
+				Source.Player_Attributes.strength,
+				Source.Player_Attributes.long_shots,
+				Source.Player_Attributes.aggression,
+				Source.Player_Attributes.interceptions,
+				Source.Player_Attributes.vision,
+				Source.Player_Attributes.penalties,
+				Source.Player_Attributes.marking,
+				Source.Player_Attributes.standing_tackle,
+				Source.Player_Attributes.sliding_tackle,
+				Source.Player_Attributes.gk_diving,
+				Source.Player_Attributes.gk_handling,
+				Source.Player_Attributes.gk_kicking,
+				Source.Player_Attributes.gk_positioning,
+				Source.Player_Attributes.gk_reflexes
+			FROM Hub_Player
+				LEFT JOIN Source.Player ON Source.Player.id = Hub_Player.bk
+					LEFT JOIN Source.Player_Attributes
+						ON Source.Player.player_api_id = Source.Player_Attributes.player_api_id
+						AND Source.Player.player_fifa_api_id = Source.Player_Attributes.player_fifa_api_id;
+
+
+--- Links
+
+INSERT INTO Link_Match (home_team_id, away_team_id, league_id, date_of_match)
+	SELECT DISTINCT Hub_Team_1.hk AS home_hk, Hub_Team_2.hk AS away_hk, Hub_League.hk, Source.Match.date FROM Source.Match
+		LEFT JOIN Sat_Team_Soccer AS STS1 ON STS1.team_api_id = Source.Match.home_team_api_id
+			LEFT JOIN Hub_Team AS Hub_Team_1 ON home_hk = STS1.team_id
+		LEFT JOIN Sat_Team_Soccer AS STS2 ON STS2.team_api_id = Source.Match.away_team_api_id
+			LEFT JOIN Hub_Team AS Hub_Team_2 ON away_hk = STS2.team_id
+		LEFT JOIN Hub_League ON Hub_League.bk = Source.Match.league_id;
+
+--- Satelliten zu Link_Match
+		
+INSERT INTO Sat_Link_Match_Soccer (
+									match_id,
+									bk_match_id,
+									match_api_id,
+									goal,
+									shot_on,
+									shot_off,
+									foul_committed,
+									card,
+									cross_pass,
+									corner,
+									possession)
+	 SELECT DISTINCT 
+									Link_Match.hk, 
+									Source.Match.id, 
+									Source.Match.match_api_id,
+									Source.Match.goal,
+									Source.Match.shoton,
+									Source.Match.shotoff,
+									Source.Match.foulcommit,
+									Source.Match.card,
+									Source.Match.cross,
+									Source.Match.corner,
+									Source.Match.possession							
+									
+		FROM Source.Match
+				
+			LEFT JOIN Sat_Team_Soccer Sat_Team_Soccer_A ON Source.Match.home_team_api_id = Sat_Team_Soccer_A.team_api_id
+				LEFT JOIN Hub_Team Hub_Team_A ON Sat_Team_Soccer_A.team_id = Hub_Team_A.hk
+					
+			LEFT JOIN Sat_Team_Soccer Sat_Team_Soccer_B ON Source.Match.away_team_api_id = Sat_Team_Soccer_B.team_api_id
+				LEFT JOIN Hub_Team Hub_Team_B ON Sat_Team_Soccer_B.team_id = Hub_Team_B.hk
+					
+			LEFT JOIN Hub_League ON Source.Match.League_id = Hub_League.bk
+		
+					LEFT JOIN Link_Match ON Hub_Team_A.hk = Link_Match.home_team_id	
+										AND Hub_Team_B.hk = Link_Match.away_team_id
+										AND Hub_League.hk = Link_Match.league_id
+										AND Source.Match.date = Link_Match.date_of_match
+		;
+										
+									
+INSERT INTO Sat_Link_Match (
+							match_id,
+							bk_match_id,
+							country_name,
+							season,
+							stage,
+							home_team_points,
+							away_team_points,
+							B365H,
+							B365D,
+							B365A,
+							BWH ,
+							BWD,
+							BWA,
+							IWH,
+							IWD,
+							IWA,
+							LBH,
+							LBD,
+							LBA,
+							PSH,
+							PSD,
+							PSA,
+							WHH,
+							WHD,
+							WHA,
+							SJH,
+							SJD,
+							SJA,
+							VCH,
+							VCD,
+							VCA,
+							GBH,
+							GBD,
+							GBA,
+							BSH,
+							BSD,
+							BSA
+							)
+							
+		SELECT DISTINCT		Link_Match.hk,
+							Source.Match.id,
+							Source.Country.name,
+							Source.Match.season,
+							Source.Match.stage,
+							Source.Match.home_team_goal,
+							Source.Match.away_team_goal,
+							Source.Match.B365H,
+							Source.Match.B365D,
+							Source.Match.B365A,
+							Source.Match.BWH ,
+							Source.Match.BWD,
+							Source.Match.BWA,
+							Source.Match.IWH,
+							Source.Match.IWD,
+							Source.Match.IWA,
+							Source.Match.LBH,
+							Source.Match.LBD,
+							Source.Match.LBA,
+							Source.Match.PSH,
+							Source.Match.PSD,
+							Source.Match.PSA,
+							Source.Match.WHH,
+							Source.Match.WHD,
+							Source.Match.WHA,
+							Source.Match.SJH,
+							Source.Match.SJD,
+							Source.Match.SJA,
+							Source.Match.VCH,
+							Source.Match.VCD,
+							Source.Match.VCA,
+							Source.Match.GBH,
+							Source.Match.GBD,
+							Source.Match.GBA,
+							Source.Match.BSH,
+							Source.Match.BSD,
+							Source.Match.BSA
+
+			FROM Source.Match
+				LEFT JOIN Source.Country ON Source.Match.country_id = Source.Country.id
+				
+				LEFT JOIN Sat_Team_Soccer Sat_Team_Soccer_A ON Source.Match.home_team_api_id = Sat_Team_Soccer_A.team_api_id
+							LEFT JOIN Hub_Team Hub_Team_A ON Sat_Team_Soccer_A.team_id = Hub_Team_A.hk
+								
+						LEFT JOIN Sat_Team_Soccer Sat_Team_Soccer_B ON Source.Match.away_team_api_id = Sat_Team_Soccer_B.team_api_id
+							LEFT JOIN Hub_Team Hub_Team_B ON Sat_Team_Soccer_B.team_id = Hub_Team_B.hk
+								
+						LEFT JOIN Hub_League ON Source.Match.League_id = Hub_League.bk
+					
+								LEFT JOIN Link_Match ON Hub_Team_A.hk = Link_Match.home_team_id	
+													AND Hub_Team_B.hk = Link_Match.away_team_id
+													AND Hub_League.hk = Link_Match.league_id
+													AND Source.Match.date = Link_Match.date_of_match;		
+						
+									
+									
+									
+									
+/*
+INSERT INTO Link_Match_Player (match_id, player_id)
+Schleife über Columns fahren! 
+
+temp_match = pd.read_sql_query(&quot;SELECT * FROM Match&quot;,con) - oder aus unserem Sat_Link_Match_Soccer ziehen, da stehen sie auch schon drin
+
+--&gt; df column für column abtasten und je in eine Zeile eines neuen DF schreiben namens temp 
+
+temp braucht folgende Spalten:
+match_id
+home_away
+player_api_id
+x_position
+y_position
+
+(in dem stehen dann drin die player_api_id 
+--&gt; anhand von denen lassen sich dann joinen über:
+
+INSERT INTO Link_Match_Player (match_id, player_id)
+	SELECT Link.Match.hk, Hub_Player.hk FROM temp
+		LEFT JOIN Sat_Player_Soccer ON Sat_Player_Soccer.player_api_id = temp.player_api_id
+			LEFT JOIN Hub_Player ON Hub_Player.hk = Sat_Player_Soccer.player_id
+	
+
+
+
+--- Satelliten zu Links
+
+
+INSERT INTO Sat_Link_Match_Soccer (
+									match_id,
+									bk_match_id,
+									match_api_id,
+									home_team_api_id,
+									away_team_api_id,
+									goal,
+									shot_on,
+									shot_off,
+									foul_committed,
+									card,
+									cross_pass,
+									corner,
+									possession,
+									home_player_X1,
+									home_player_X2,
+									home_player_X3,
+									home_player_X4,
+									home_player_X5,
+									home_player_X6,
+									home_player_X7,
+									home_player_X8,
+									home_player_X9,
+									home_player_X10,
+									home_player_X11,
+									away_player_X1,
+									away_player_X2,
+									away_player_X3,
+									away_player_X4,
+									away_player_X5,
+									away_player_X6,
+									away_player_X7,
+									away_player_X8,
+									away_player_X9,
+									away_player_X10,
+									away_player_X11,
+									home_player_Y1,
+									home_player_Y2,
+									home_player_Y3,
+									home_player_Y4,
+									home_player_Y5,
+									home_player_Y6,
+									home_player_Y7,
+									home_player_Y8,
+									home_player_Y9,
+									home_player_Y10,
+									home_player_Y11,
+									away_player_Y1,
+									away_player_Y2,
+									away_player_Y3,
+									away_player_Y4,
+									away_player_Y5,
+									away_player_Y6,
+									away_player_Y7,
+									away_player_Y8,
+									away_player_Y9,
+									away_player_Y10,
+									away_player_Y11,
+									home_player_1,
+									home_player_2,
+									home_player_3,
+									home_player_4,
+									home_player_5,
+									home_player_6,
+									home_player_7,
+									home_player_8,
+									home_player_9,
+									home_player_10,
+									home_player_11,
+									away_player_1,
+									away_player_2,
+									away_player_3,
+									away_player_4,
+									away_player_5,
+									away_player_6,
+									away_player_7,
+									away_player_8,
+									away_player_9,
+									away_player_10,
+									away_player_11)
+		SELECT Link_Match.hk, 
+				Source.Match.id,
+				Source.Match.match_api_id,
+				Source.Match.home_team_api_id,
+				Source.Match.away_team_api_id,
+				Source.Match.goal,
+				Source.Match.shoton,
+				Source.Match.shotoff,
+				Source.Match.foulcommit,
+				Source.Match.card,
+				Source.Match.cross,
+				Source.Match.corner,
+				Source.Match.possession,
+				Source.Match.home_player_X1,
+				Source.Match.home_player_X2,
+				Source.Match.home_player_X3,
+				Source.Match.home_player_X4,
+				Source.Match.home_player_X5,
+				Source.Match.home_player_X6,
+				Source.Match.home_player_X7,
+				Source.Match.home_player_X8,
+				Source.Match.home_player_X9,
+				Source.Match.home_player_X10,
+				Source.Match.home_player_X11,
+				Source.Match.away_player_X1,
+				Source.Match.away_player_X2,
+				Source.Match.away_player_X3,
+				Source.Match.away_player_X4,
+				Source.Match.away_player_X5,
+				Source.Match.away_player_X6,
+				Source.Match.away_player_X7,
+				Source.Match.away_player_X8,
+				Source.Match.away_player_X9,
+				Source.Match.away_player_X10,
+				Source.Match.away_player_X11,
+				Source.Match.home_player_Y1,
+				Source.Match.home_player_Y2,
+				Source.Match.home_player_Y3,
+				Source.Match.home_player_Y4,
+				Source.Match.home_player_Y5,
+				Source.Match.home_player_Y6,
+				Source.Match.home_player_Y7,
+				Source.Match.home_player_Y8,
+				Source.Match.home_player_Y9,
+				Source.Match.home_player_Y10,
+				Source.Match.home_player_Y11,
+				Source.Match.away_player_Y1,
+				Source.Match.away_player_Y2,
+				Source.Match.away_player_Y3,
+				Source.Match.away_player_Y4,
+				Source.Match.away_player_Y5,
+				Source.Match.away_player_Y6,
+				Source.Match.away_player_Y7,
+				Source.Match.away_player_Y8,
+				Source.Match.away_player_Y9,
+				Source.Match.away_player_Y10,
+				Source.Match.away_player_Y11,
+				Source.Match.home_player_1,
+				Source.Match.home_player_2,
+				Source.Match.home_player_3,
+				Source.Match.home_player_4,
+				Source.Match.home_player_5,
+				Source.Match.home_player_6,
+				Source.Match.home_player_7,
+				Source.Match.home_player_8,
+				Source.Match.home_player_9,
+				Source.Match.home_player_10,
+				Source.Match.home_player_11,
+				Source.Match.away_player_1,
+				Source.Match.away_player_2,
+				Source.Match.away_player_3,
+				Source.Match.away_player_4,
+				Source.Match.away_player_5,
+				Source.Match.away_player_6,
+				Source.Match.away_player_7,
+				Source.Match.away_player_8,
+				Source.Match.away_player_9,
+				Source.Match.away_player_10,
+				Source.Match.away_player_11
+			FROM Link_Match 
+				LEFT JOIN Hub_Team ON Hub_Team.hk = Link_Match.home_team_id
+									AND Hub_Team.hk = Link_Match.away_team_id
+						LEFT JOIN Sat_Team_Soccer ON Sat_Team_Soccer.team_id = Hub_Team.hk
+							LEFT JOIN Source.Match ON Sat_Team_Soccer.team_api_id = Source.Match.home_team_id
+													AND Sat_Team_Soccer.team_api_id = Source.Match.away_team_api_id
+				
+LEFT JOIN Sat_Team_Soccer AS STS1 ON STS1.team_api_id = Source.Match.home_team_api_id
+			LEFT JOIN Hub_Team AS Hub_Team_1 ON home_hk = STS1.team_id
+		LEFT JOIN Sat_Team_Soccer AS STS2 ON STS2.team_api_id = Source.Match.away_team_api_id
+			LEFT JOIN Hub_Team AS Hub_Team_2 ON away_hk = STS2.team_id
+		LEFT JOIN Hub_League ON Hub_League.bk = Source.Match.league_id;
+				
+				
+*/
+
+
+
+</sql><sql name="Selects_Python.sql">SELECT id FROM Source.League;
+	
+SELECT id FROM Source.Team;
+
+SELECT id FROM Source.Player;
+	
+SELECT Hub_League.hk, Source.League.name, Source.Country.name FROM Hub_League
+	LEFT JOIN Source.League ON Source.League.id = Hub_League.bk
+		LEFT JOIN Source.Country ON Source.Country.id = Source.League.country_id;
+
+SELECT Hub_Team.hk, Source.Team.team_long_name, Source.Team.team_short_name, 'soccer', 'm', 1 FROM Hub_Team
+	LEFT JOIN Source.Team ON Hub_Team.bk = Source.Team.id;
+
+SELECT Hub_Team.hk, 
+		Source.Team_Attributes.team_fifa_api_id,
+		Source.Team_Attributes.team_api_id,
+		Source.Team_Attributes.date,
+		Source.Team_Attributes.buildUpPlaySpeed,
+		Source.Team_Attributes.buildUpPlaySpeedClass,
+		Source.Team_Attributes.buildUpPlayDribbling,
+		Source.Team_Attributes.buildUpPlayDribblingClass,
+		Source.Team_Attributes.buildUpPlayPassing,
+		Source.Team_Attributes.buildUpPlayPassingClass,
+		Source.Team_Attributes.buildUpPlayPositioningClass,
+		Source.Team_Attributes.chanceCreationPassing,
+		Source.Team_Attributes.chanceCreationPassingClass,
+		Source.Team_Attributes.chanceCreationCrossing,
+		Source.Team_Attributes.chanceCreationCrossingClass,
+		Source.Team_Attributes.chanceCreationShooting,
+		Source.Team_Attributes.chanceCreationShootingClass,
+		Source.Team_Attributes.chanceCreationPositioningClass,
+		Source.Team_Attributes.defencePressure,
+		Source.Team_Attributes.defencePressureClass,
+		Source.Team_Attributes.defenceAggression,
+		Source.Team_Attributes.defenceAggressionClass,
+		Source.Team_Attributes.defenceTeamWidth,
+		Source.Team_Attributes.defenceTeamWidthClass,
+		Source.Team_Attributes.defenceDefenderLineClass
+	FROM Hub_Team
+		LEFT JOIN Source.Team ON Hub_Team.bk = Source.Team.id
+			LEFT JOIN Source.Team_Attributes 
+				ON Source.Team.team_api_id = Source.Team_Attributes.team_api_id 
+				AND Source.Team.team_fifa_api_id = Source.Team_Attributes.team_fifa_api_id;
+
+SELECT Hub_Player.hk, Source.Player.player_name, Source.Player.birthday, Source.Player.height,Source.Player.weight
+	FROM Hub_Player
+		LEFT JOIN Source.Player ON Hub_Player.bk = Source.Player.id;
+			
+SELECT 	Hub_Player.hk, 
+		Source.Player_Attributes.player_api_id,
+		Source.Player_Attributes.player_fifa_api_id,
+		Source.Player_Attributes.date,
+		Source.Player_Attributes.overall_rating,
+		Source.Player_Attributes.potential,
+		Source.Player_Attributes.preferred_foot,
+		Source.Player_Attributes.attacking_work_rate,
+		Source.Player_Attributes.defensive_work_rate,
+		Source.Player_Attributes.crossing,
+		Source.Player_Attributes.finishing,
+		Source.Player_Attributes.heading_accuracy,
+		Source.Player_Attributes.short_passing,
+		Source.Player_Attributes.volleys,
+		Source.Player_Attributes.dribbling,
+		Source.Player_Attributes.curve,
+		Source.Player_Attributes.free_kick_accuracy,
+		Source.Player_Attributes.long_passing,
+		Source.Player_Attributes.ball_control,
+		Source.Player_Attributes.acceleration,
+		Source.Player_Attributes.sprint_speed,
+		Source.Player_Attributes.agility,
+		Source.Player_Attributes.reactions,
+		Source.Player_Attributes.balance,
+		Source.Player_Attributes.shot_power,
+		Source.Player_Attributes.stamina,
+		Source.Player_Attributes.strength,
+		Source.Player_Attributes.long_shots,
+		Source.Player_Attributes.aggression,
+		Source.Player_Attributes.interceptions,
+		Source.Player_Attributes.vision,
+		Source.Player_Attributes.penalties,
+		Source.Player_Attributes.marking,
+		Source.Player_Attributes.standing_tackle,
+		Source.Player_Attributes.sliding_tackle,
+		Source.Player_Attributes.gk_diving,
+		Source.Player_Attributes.gk_handling,
+		Source.Player_Attributes.gk_kicking,
+		Source.Player_Attributes.gk_positioning,
+		Source.Player_Attributes.gk_reflexes
+	FROM Hub_Player
+		LEFT JOIN Source.Player ON Source.Player.id = Hub_Player.bk
+			LEFT JOIN Source.Player_Attributes
+				ON Source.Player.player_api_id = Source.Player_Attributes.player_api_id
+				AND Source.Player.player_fifa_api_id = Source.Player_Attributes.player_fifa_api_id;
+
+SELECT DISTINCT Hub_Team_1.hk AS home_hk, Hub_Team_2.hk AS away_hk, Hub_League.hk, Source.Match.date FROM Source.Match
+	LEFT JOIN Sat_Team_Soccer AS STS1 ON STS1.team_api_id = Source.Match.home_team_api_id
+		LEFT JOIN Hub_Team AS Hub_Team_1 ON home_hk = STS1.team_id
+	LEFT JOIN Sat_Team_Soccer AS STS2 ON STS2.team_api_id = Source.Match.away_team_api_id
+		LEFT JOIN Hub_Team AS Hub_Team_2 ON away_hk = STS2.team_id
+	LEFT JOIN Hub_League ON Hub_League.bk = Source.Match.league_id;
+		
+
+SELECT DISTINCT Link_Match.hk, 
+				Source.Match.id, 
+				Source.Match.match_api_id,
+				Source.Match.goal,
+				Source.Match.shoton,
+				Source.Match.shotoff,
+				Source.Match.foulcommit,
+				Source.Match.card,
+				Source.Match.cross,
+				Source.Match.corner,
+				Source.Match.possession													
+	FROM Source.Match	
+		LEFT JOIN Sat_Team_Soccer Sat_Team_Soccer_A ON Source.Match.home_team_api_id = Sat_Team_Soccer_A.team_api_id
+			LEFT JOIN Hub_Team Hub_Team_A ON Sat_Team_Soccer_A.team_id = Hub_Team_A.hk		
+		LEFT JOIN Sat_Team_Soccer Sat_Team_Soccer_B ON Source.Match.away_team_api_id = Sat_Team_Soccer_B.team_api_id
+			LEFT JOIN Hub_Team Hub_Team_B ON Sat_Team_Soccer_B.team_id = Hub_Team_B.hk		
+		LEFT JOIN Hub_League ON Source.Match.League_id = Hub_League.bk
+				LEFT JOIN Link_Match ON Hub_Team_A.hk = Link_Match.home_team_id	
+									AND Hub_Team_B.hk = Link_Match.away_team_id
+									AND Hub_League.hk = Link_Match.league_id
+									AND Source.Match.date = Link_Match.date_of_match;
+
+	
+SELECT DISTINCT	Link_Match.hk,
+				Source.Match.id,
+				Source.Country.name,
+				Source.Match.date,
+				Source.Match.stage,
+				Source.Match.home_team_goal,
+				Source.Match.away_team_goal,
+				Source.Match.B365H,
+				Source.Match.B365D,
+				Source.Match.B365A,
+				Source.Match.BWH ,
+				Source.Match.BWD,
+				Source.Match.BWA,
+				Source.Match.IWH,
+				Source.Match.IWD,
+				Source.Match.IWA,
+				Source.Match.LBH,
+				Source.Match.LBD,
+				Source.Match.LBA,
+				Source.Match.PSH,
+				Source.Match.PSD,
+				Source.Match.PSA,
+				Source.Match.WHH,
+				Source.Match.WHD,
+				Source.Match.WHA,
+				Source.Match.SJH,
+				Source.Match.SJD,
+				Source.Match.SJA,
+				Source.Match.VCH,
+				Source.Match.VCD,
+				Source.Match.VCA,
+				Source.Match.GBH,
+				Source.Match.GBD,
+				Source.Match.GBA,
+				Source.Match.BSH,
+				Source.Match.BSD,
+				Source.Match.BSA
+FROM Source.Match
+	LEFT JOIN Source.Country ON Source.Match.country_id = Source.Country.id
+	LEFT JOIN Sat_Team_Soccer Sat_Team_Soccer_A ON Source.Match.home_team_api_id = Sat_Team_Soccer_A.team_api_id
+				LEFT JOIN Hub_Team Hub_Team_A ON Sat_Team_Soccer_A.team_id = Hub_Team_A.hk					
+			LEFT JOIN Sat_Team_Soccer Sat_Team_Soccer_B ON Source.Match.away_team_api_id = Sat_Team_Soccer_B.team_api_id
+				LEFT JOIN Hub_Team Hub_Team_B ON Sat_Team_Soccer_B.team_id = Hub_Team_B.hk					
+			LEFT JOIN Hub_League ON Source.Match.League_id = Hub_League.bk	
+					LEFT JOIN Link_Match ON Hub_Team_A.hk = Link_Match.home_team_id	
+										AND Hub_Team_B.hk = Link_Match.away_team_id
+										AND Hub_League.hk = Link_Match.league_id
+										AND Source.Match.date = Link_Match.date_of_match;		
+</sql><sql name="Inserts_Python.sql">INSERT INTO Record_Source (source_name, comment) VALUES ('database.db', 'diese Datenbank umfasst Daten aus anderen Quellsystemen, über deren Quelldaten wir nicht verfügen');
+
+
+
+
+INSERT INTO Hub_League (bk);
+
+INSERT INTO Hub_Team(bk);
+
+INSERT INTO Hub_Player(bk);
+
+INSERT INTO Sat_League (league_id, league_name, country_name);
+
+INSERT INTO Sat_Team (team_id, long_name, short_name, sport_type, gender, club_team);
+
+INSERT INTO Sat_Team_Soccer (team_id,
+							team_fifa_api_id, 
+							team_api_id, 
+							date_of_record, 
+							buildUpPlaySpeed,
+							buildUpPlaySpeedClass,
+							buildUpPlayDribbling,
+							buildUpPlayDribblingClass,
+							buildUpPlayPassing,
+							buildUpPlayPassingClass,
+							buildUpPlayPositioningClass,
+							chanceCreationPassing,
+							chanceCreationPassingClass,
+							chanceCreationCrossing,
+							chanceCreationCrossingClass,
+							chanceCreationShooting,
+							chanceCreationShootingClass,
+							chanceCreationPositioningClass,
+							defencePressure,
+							defencePressureClass,
+							defenceAggression,
+							defenceAggressionClass,
+							defenceTeamWidth,
+							defenceTeamWidthClass,
+							defenceDefenderLineClass);
+							
+INSERT INTO Sat_Player (player_id, name, birthday, height, weight);
+
+INSERT INTO Sat_Player_Soccer (player_id, 
+								player_api_id,
+								player_fifa_api_id,
+								date_of_record,
+								overall_rating,
+								potential,
+								preferred_foot,
+								attacking_work_rate,
+								defensive_work_rate,
+								crossing,
+								finishing,
+								heading_accuracy,
+								short_passing,
+								volleys,
+								dribbling,
+								curve,
+								free_kick_accuracy,
+								long_passing,
+								ball_control,
+								acceleration,
+								sprint_speed,
+								agility,
+								reactions,
+								balance,
+								shot_power,
+								stamina,
+								strength,
+								long_shots,
+								aggression,
+								interceptions,
+								vision,
+								penalties,
+								marking,
+								standing_tackle,
+								sliding_tackle,
+								gk_diving,
+								gk_handling,
+								gk_kicking,
+								gk_positioning,
+								gk_reflexes);
+								
+INSERT INTO Link_Match (home_team_id, away_team_id, league_id, date_of_match);
+
+INSERT INTO Sat_Link_Match_Soccer (
+									match_id,
+									bk_match_id,
+									match_api_id,
+									goal,
+									shot_on,
+									shot_off,
+									foul_committed,
+									card,
+									cross_pass,
+									corner,
+									possession);
+									
+									
+INSERT INTO Sat_Link_Match (
+							match_id,
+							bk_match_id,
+							country_name,
+							season,
+							stage,
+							home_team_points,
+							away_team_points,
+							B365H,
+							B365D,
+							B365A,
+							BWH ,
+							BWD,
+							BWA,
+							IWH,
+							IWD,
+							IWA,
+							LBH,
+							LBD,
+							LBA,
+							PSH,
+							PSD,
+							PSA,
+							WHH,
+							WHD,
+							WHA,
+							SJH,
+							SJD,
+							SJA,
+							VCH,
+							VCD,
+							VCA,
+							GBH,
+							GBD,
+							GBA,
+							BSH,
+							BSD,
+							BSA
+							);
+
+
+							</sql><sql name="Selects_Python_new">
+--- SELECT für Sat_Team_Soccer:
+
+SELECT DISTINCT	Source.Team.id, 
+				Source.Team_Attributes.team_fifa_api_id,
+				Source.Team_Attributes.team_api_id,
+				Source.Team_Attributes.date,
+				Source.Team_Attributes.buildUpPlaySpeed,
+				Source.Team_Attributes.buildUpPlaySpeedClass,
+				Source.Team_Attributes.buildUpPlayDribbling,
+				Source.Team_Attributes.buildUpPlayDribblingClass,
+				Source.Team_Attributes.buildUpPlayPassing,
+				Source.Team_Attributes.buildUpPlayPassingClass,
+				Source.Team_Attributes.buildUpPlayPositioningClass,
+				Source.Team_Attributes.chanceCreationPassing,
+				Source.Team_Attributes.chanceCreationPassingClass,
+				Source.Team_Attributes.chanceCreationCrossing,
+				Source.Team_Attributes.chanceCreationCrossingClass,
+				Source.Team_Attributes.chanceCreationShooting,
+				Source.Team_Attributes.chanceCreationShootingClass,
+				Source.Team_Attributes.chanceCreationPositioningClass,
+				Source.Team_Attributes.defencePressure,
+				Source.Team_Attributes.defencePressureClass,
+				Source.Team_Attributes.defenceAggression,
+				Source.Team_Attributes.defenceAggressionClass,
+				Source.Team_Attributes.defenceTeamWidth,
+				Source.Team_Attributes.defenceTeamWidthClass,
+				Source.Team_Attributes.defenceDefenderLineClass
+			FROM Source.Team_Attributes
+				LEFT JOIN Source.Team ON Source.Team_Attributes.team_fifa_api_id = Source.Team.team_fifa_api_id
+										AND Source.Team_Attributes.team_api_id = Source.Team.team_api_id;
+						
+						
+
+--- SELECT für Sat_Player_Soccer:
+		
+		SELECT  Source.Player.id, 
+				Source.Player_Attributes.player_api_id,
+				Source.Player_Attributes.player_fifa_api_id,
+				Source.Player_Attributes.date,
+				Source.Player_Attributes.overall_rating,
+				Source.Player_Attributes.potential,
+				Source.Player_Attributes.preferred_foot,
+				Source.Player_Attributes.attacking_work_rate,
+				Source.Player_Attributes.defensive_work_rate,
+				Source.Player_Attributes.crossing,
+				Source.Player_Attributes.finishing,
+				Source.Player_Attributes.heading_accuracy,
+				Source.Player_Attributes.short_passing,
+				Source.Player_Attributes.volleys,
+				Source.Player_Attributes.dribbling,
+				Source.Player_Attributes.curve,
+				Source.Player_Attributes.free_kick_accuracy,
+				Source.Player_Attributes.long_passing,
+				Source.Player_Attributes.ball_control,
+				Source.Player_Attributes.acceleration,
+				Source.Player_Attributes.sprint_speed,
+				Source.Player_Attributes.agility,
+				Source.Player_Attributes.reactions,
+				Source.Player_Attributes.balance,
+				Source.Player_Attributes.shot_power,
+				Source.Player_Attributes.stamina,
+				Source.Player_Attributes.strength,
+				Source.Player_Attributes.long_shots,
+				Source.Player_Attributes.aggression,
+				Source.Player_Attributes.interceptions,
+				Source.Player_Attributes.vision,
+				Source.Player_Attributes.penalties,
+				Source.Player_Attributes.marking,
+				Source.Player_Attributes.standing_tackle,
+				Source.Player_Attributes.sliding_tackle,
+				Source.Player_Attributes.gk_diving,
+				Source.Player_Attributes.gk_handling,
+				Source.Player_Attributes.gk_kicking,
+				Source.Player_Attributes.gk_positioning,
+				Source.Player_Attributes.gk_reflexes
+			
+			FROM Source.Player_Attributes
+				LEFT JOIN Source.Player ON Source.Player_Attributes.player_fifa_api_id = Source.Player.player_fifa_api_id
+										AND Source.Player_Attributes.player_api_id = Source.Player.player_api_id;
+			
+			
+			
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
